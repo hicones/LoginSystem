@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import GenericInput from "../../src/components/inputs";
+import { firebase, auth } from "../../src/services/firebaseSetup";
 
 //Images
 import background from "../../src/assets/login_bg.png";
@@ -44,12 +45,11 @@ const Login: NextPage = () => {
     show: { opacity: 1 },
   };
 
-  const responseGoogle = (res: any) => {
-    console.log(res);
-  };
+  const handleGoogleLogin = async () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
 
-  const errorResponseGoogle = (res: any) => {
-    console.log(res);
+    const result = await auth.signInWithPopup(provider);
+    console.log(result.user?._delegate);
   };
 
   return (
@@ -60,7 +60,7 @@ const Login: NextPage = () => {
           <motion.div variants={item}>
             <S.MainLogin>
               <h1 className="heading24">Sign In</h1>
-              <S.LoginWithGoogle type="button">
+              <S.LoginWithGoogle type="button" onClick={handleGoogleLogin}>
                 <Image src={googleLogo} alt="google" />
                 <span>Sign in with Google</span>
               </S.LoginWithGoogle>
