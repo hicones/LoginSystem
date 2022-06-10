@@ -8,6 +8,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import GenericInput from "../../src/components/inputs";
 import { firebase, auth } from "../../src/services/firebaseSetup";
+import { AuthContext } from "../../src/context/AuthContext";
 
 //Images
 import background from "../../src/assets/login_bg.png";
@@ -19,6 +20,22 @@ const Login: NextPage = () => {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const { signIn, signInWithGoogle } = useContext(AuthContext);
+
+  // Sign In
+
+  function handleLogin(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    setLoading(true);
+
+    signIn({ email, password: senha }).finally(() => setLoading(false));
+  }
+
+  const handleGoogleLogin = async () => {
+    signInWithGoogle();
+  };
 
   //navigation
   const router = useRouter();
@@ -43,13 +60,6 @@ const Login: NextPage = () => {
   const item = {
     hidden: { opacity: 0 },
     show: { opacity: 1 },
-  };
-
-  const handleGoogleLogin = async () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-
-    const result = await auth.signInWithPopup(provider);
-    console.log(result.user?._delegate);
   };
 
   return (
@@ -78,7 +88,7 @@ const Login: NextPage = () => {
                 </span>
                 <S.Spacer />
               </div>
-              <S.FormLogin>
+              <S.FormLogin onSubmit={(e) => handleLogin(e)}>
                 <GenericInput
                   title="E-mail"
                   value={email}

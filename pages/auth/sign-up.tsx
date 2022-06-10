@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useContext, useState } from "react";
 import * as S from "../../styles/login";
 
 //next
@@ -16,6 +16,7 @@ import loadingW from "../../src/assets/icons/loading_white.svg";
 import { registerUser } from "../../src/services/auth";
 import { toast } from "react-toastify";
 import googleLogo from "../../src/assets/google.svg";
+import { AuthContext } from "../../src/context/AuthContext";
 
 const Home: NextPage = () => {
   const [username, setUsername] = useState("");
@@ -23,7 +24,13 @@ const Home: NextPage = () => {
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
 
+  const { signInWithGoogle } = useContext(AuthContext);
+
   const [loading, setLoading] = useState(false);
+
+  const handleGoogleLogin = async () => {
+    signInWithGoogle();
+  };
 
   //navigation
   const router = useRouter();
@@ -33,7 +40,7 @@ const Home: NextPage = () => {
 
     setLoading(true);
 
-    registerUser(username, email, senha, confirmarSenha)
+    registerUser(username, email, senha)
       .then(() => {
         toast("Created !", {
           type: "success",
@@ -50,21 +57,13 @@ const Home: NextPage = () => {
       .finally(() => setLoading(false));
   }
 
-  const responseGoogle = (res: any) => {
-    console.log(res);
-  };
-
-  const errorResponseGoogle = (res: any) => {
-    console.log(res);
-  };
-
   return (
     <S.Container>
       <S.BgContainer style={{ backgroundImage: `url(${background.src})` }} />
       <S.LoginContainer>
         <S.MainLogin>
           <h1 className="heading24">Sign Up</h1>
-          <S.LoginWithGoogle type="button">
+          <S.LoginWithGoogle type="button" onClick={handleGoogleLogin}>
             <Image src={googleLogo} alt="google" />
             <span>Sign up with Google</span>
           </S.LoginWithGoogle>

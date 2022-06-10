@@ -5,6 +5,7 @@ import { api } from "../services/api";
 
 //auth
 import { signInRequest, recoverUserInformation } from "../services/auth";
+import { firebase, auth } from "../services/firebaseSetup";
 
 //Interfaces
 import { IUser } from "../interfaces/user.interface";
@@ -18,6 +19,7 @@ type IAuthContext = {
   user: IUser | null;
   signIn: (data: ISignInData) => Promise<void>;
   signOut: () => void;
+  signInWithGoogle: () => void;
 };
 
 type ISignInData = {
@@ -36,21 +38,7 @@ function AuthProvider({ children }: props) {
     const { "user.token": token } = parseCookies();
 
     if (token) {
-      recoverUserInformation()
-        .then((res) => {
-          setUser(res.data.data.customer);
-
-          if (process.env.NODE_ENV === "development")
-            console.log("User Data Recovery");
-        })
-        .catch(() => {
-          signOut();
-
-          if (process.env.NODE_ENV === "development")
-            console.log(
-              "deslogado para recuperar informaçoes do user, AuthContext.tsx"
-            );
-        });
+      recoverUserInformation();
     }
   }, []);
 
@@ -61,20 +49,27 @@ function AuthProvider({ children }: props) {
       email,
       password,
     })
-      .then(({ data }) => {
-        const { token, user } = data.data.customer;
+      .then((userCredential) => {
+        const user = userCredential.user?._delegate;
         //set user token
-        setCookie({}, "user.token", token, {
+        setCookie({}, "user.token", user.accessToken, {
           maxAge: 60 * 60 * 24, //24 hours
           path: "/",
         });
 
         //set user data
-        setUser(user);
+        setUser({
+          email: user.email,
+          emailVerified: user.emailVerified,
+          accessToken: user.accessToken,
+          photoURL: user.photoURL,
+          uid: user.uid,
+          phoneNumber: user.phoneNumber,
+        });
 
         //set user default header
         // @ts-ignore: Unreachable code error
-        api.defaults.headers["Authorization"] = `Bearer ${token}`;
+        api.defaults.headers["Authorization"] = `Bearer ${user.accessToken}`;
 
         //redirect to home page
         Router.push("/");
@@ -84,18 +79,45 @@ function AuthProvider({ children }: props) {
       });
   }
 
+  async function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    const result = await auth.signInWithPopup(provider);
+
+    const user = result.user?._delegate;
+
+    setUser({
+      name: user.displayName,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      accessToken: user.accessToken,
+      photoURL: user.photoURL,
+      uid: user.uid,
+      phoneNumber: user.phoneNumber,
+    });
+
+    Router.push("/");
+  }
+
   //signOut
   async function signOut() {
     destroyCookie(null, "user.token", {
       path: "/",
     });
     setUser(null);
+    auth.signOut();
     Router.push("/");
   }
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated: !!user, user, signIn, signOut }}
+      value={{
+        isAuthenticated: !!user,
+        user,
+        signIn,
+        signOut,
+        signInWithGoogle,
+      }}
     >
       {children}
     </AuthContext.Provider>

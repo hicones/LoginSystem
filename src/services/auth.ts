@@ -1,25 +1,26 @@
 import { toast } from "react-toastify";
 import { api } from "./api";
+import { auth } from "./firebaseSetup";
 
 type ISignInRequest = {
-  email?: string;
-  password?: string;
+  email: string;
+  password: string;
 };
 
 function signInRequest({ email, password }: ISignInRequest) {
-  return api.post("/auth/login", { email, password });
+  return auth.signInWithEmailAndPassword(email, password);
+}
+
+function resetPassword(email: string) {
+  return auth.sendPasswordResetEmail(email);
 }
 
 function recoverUserInformation() {
-  return api.post("/auth/current");
+  return auth.currentUser;
 }
 
 async function registerUser(name: string, email: string, password: string) {
-  return api.post("/auth/register", {
-    name,
-    password,
-    email,
-  });
+  return auth.createUserWithEmailAndPassword(email, password);
 }
 
-export { signInRequest, recoverUserInformation, registerUser };
+export { signInRequest, recoverUserInformation, registerUser, resetPassword };
