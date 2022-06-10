@@ -17,7 +17,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## Learn More
 
 Were created the login, registration, forgot password and new password screens 
-
 <br>
 The database and authentication system is made with firebase
 
