@@ -49,8 +49,8 @@ function AuthProvider({ children }: props) {
       email,
       password,
     })
-      .then((userCredential) => {
-        const user = userCredential.user?._delegate;
+      .then((userCredential: any) => {
+        const user = userCredential.user?.multiFactor?.user;
         //set user token
         setCookie({}, "user.token", user.accessToken, {
           maxAge: 60 * 60 * 24, //24 hours
@@ -82,21 +82,20 @@ function AuthProvider({ children }: props) {
   async function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    const result = await auth.signInWithPopup(provider);
+    await auth.signInWithPopup(provider).then((result: any) => {
+      const user = result.user?._delegate;
+      setUser({
+        name: user.displayName,
+        email: user.email,
+        emailVerified: user.emailVerified,
+        accessToken: user.accessToken,
+        photoURL: user.photoURL,
+        uid: user.uid,
+        phoneNumber: user.phoneNumber,
+      });
 
-    const user = result.user?._delegate;
-
-    setUser({
-      name: user.displayName,
-      email: user.email,
-      emailVerified: user.emailVerified,
-      accessToken: user.accessToken,
-      photoURL: user.photoURL,
-      uid: user.uid,
-      phoneNumber: user.phoneNumber,
+      Router.push("/");
     });
-
-    Router.push("/");
   }
 
   //signOut
