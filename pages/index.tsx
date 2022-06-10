@@ -21,7 +21,7 @@ const Home: NextPage = () => {
 
         <main className={styles.main}>
           <h1 className={styles.title}>
-            Welcome <a href="#">{user?.name ? user?.name : "Henrique"}</a>
+            Welcome <a href="#">{user?.name ? user?.name : "User"}</a>
           </h1>
 
           <p className={styles.description}>
@@ -35,7 +35,7 @@ const Home: NextPage = () => {
                 src={
                   user?.photoURL
                     ? user?.photoURL
-                    : "https://avatars.githubusercontent.com/u/59674959?v=4"
+                    : "https://cdn-icons-png.flaticon.com/512/17/17004.png"
                 }
                 width="120px"
                 alt="userImage"
