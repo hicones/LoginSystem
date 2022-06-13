@@ -9,6 +9,7 @@ import { firebase, auth } from "../services/firebaseSetup";
 
 //Interfaces
 import { IUser } from "../interfaces/user.interface";
+import { toast } from "react-toastify";
 
 type props = {
   children: React.ReactNode;
@@ -75,27 +76,38 @@ function AuthProvider({ children }: props) {
         Router.push("/");
       })
       .catch((err) => {
-        console.log(err);
+        console.log("Error on Sign in", err);
+        toast("Error on sign in", {
+          type: "error",
+        });
       });
   }
 
   async function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    await auth.signInWithPopup(provider).then((result: any) => {
-      const user = result.user?._delegate;
-      setUser({
-        name: user.displayName,
-        email: user.email,
-        emailVerified: user.emailVerified,
-        accessToken: user.accessToken,
-        photoURL: user.photoURL,
-        uid: user.uid,
-        phoneNumber: user.phoneNumber,
-      });
+    await auth
+      .signInWithPopup(provider)
+      .then((result: any) => {
+        const user = result.user?._delegate;
+        setUser({
+          name: user.displayName,
+          email: user.email,
+          emailVerified: user.emailVerified,
+          accessToken: user.accessToken,
+          photoURL: user.photoURL,
+          uid: user.uid,
+          phoneNumber: user.phoneNumber,
+        });
 
-      Router.push("/");
-    });
+        Router.push("/");
+      })
+      .catch((err) => {
+        console.log("Error on Sign in", err);
+        toast("Error on sign in", {
+          type: "error",
+        });
+      });
   }
 
   //signOut
